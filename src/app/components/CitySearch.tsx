@@ -1,6 +1,6 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect } from "react";
 import { observer } from "mobx-react-lite";
-import { TextField, Autocomplete, Box } from "@mui/material";
+import { TextField, Autocomplete, Box, CircularProgress } from "@mui/material";
 import weatherStore from "../store/weatherStore";
 import LocationButton from "./LocationButton";
 import { useDebouncedCallback } from "../hooks/useDebouncedCallback";
@@ -39,6 +39,12 @@ const CitySearch: React.FC = observer(() => {
 
   const getOptionLabel = useCallback((option: City) => `${option.name}, ${option.country}`, []);
 
+  useEffect(() => {
+    if (lastSearchedCity) {
+      weatherStore.fetchWeather(`${lastSearchedCity.name},${lastSearchedCity.country}`);
+    }
+  }, [lastSearchedCity]);
+
   return (
     <Box>
       <Autocomplete
@@ -60,6 +66,15 @@ const CitySearch: React.FC = observer(() => {
             variant="outlined"
             fullWidth
             placeholder="e.g. Paris, New York, Tokyo"
+            InputProps={{
+              ...params.InputProps,
+              endAdornment: (
+                <>
+                  {loadingSuggestions ? <CircularProgress color="inherit" size={20} /> : null}
+                  {params.InputProps.endAdornment}
+                </>
+              ),
+            }}
           />
         )}
       />
@@ -68,4 +83,4 @@ const CitySearch: React.FC = observer(() => {
   );
 });
 
-export default React.memo(CitySearch);
+export default CitySearch;

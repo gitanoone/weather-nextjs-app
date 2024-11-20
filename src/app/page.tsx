@@ -8,10 +8,12 @@ import CitySearch from './components/CitySearch';
 import WeatherCard from './components/WeatherCard';
 import weatherStore from './store/weatherStore';
 import themeStore from './store/themeStore';
+import useAuth from './hooks/useAuth';
 
 const HomePage = observer(() => {
-  const { weatherData, isLoading, error } = weatherStore;
+  useAuth();
 
+  const { weatherData, isLoadingWeather, error } = weatherStore;
   const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
 
   useEffect(() => {
@@ -65,8 +67,8 @@ const HomePage = observer(() => {
 
         <CitySearch />
         <WeatherCard
-          data={!isLoading ? weatherData : null}
-          isLoading={isLoading}
+          data={!isLoadingWeather ? weatherData : null}
+          isLoadingWeather={isLoadingWeather}
           error={error}
         />
 

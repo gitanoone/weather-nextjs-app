@@ -1,7 +1,6 @@
+import { fetchWithAuth } from "../utils/authUtils";
 import { makeAutoObservable } from "mobx";
-import { fetchWeatherData, fetchWeatherByCoordinates, fetchCitySuggestions } from "../services/weatherService";
-import { transformWeatherData } from "../utils/weatherUtils";
-import { City, CurrentWeather, RawWeatherData, CitySearchResponse} from "../types/weatherTypes";
+import { City, RawWeatherData, CityFromAPI, CurrentWeather } from "../types/weatherTypes";
 
 class WeatherStore {
   city: City | null = null;
@@ -9,9 +8,9 @@ class WeatherStore {
   weatherData: CurrentWeather | null = null;
   options: City[] = [];
   loadingSuggestions = false;
+  isLoadingWeather = false;
   isRequestingLocation = false;
-  lastLocation: { latitude: number, longitude: number } | null = null;
-  isLoading = false;
+  lastLocation: { latitude: number; longitude: number } | null = null;
   weatherSource: "search" | "location" | null = null;
   error: string | null = null;
 
@@ -24,12 +23,21 @@ class WeatherStore {
   }
 
   setWeatherData(data: RawWeatherData) {
-    this.weatherData = transformWeatherData(data);
-    this.isLoading = false;
+    this.weatherData = {
+      name: data.name,
+      country: data.sys.country,
+      temperature: Math.round(data.main.temp - 273.15),
+      humidity: data.main.humidity,
+      pressure: data.main.pressure,
+      windSpeed: data.wind.speed,
+      description: data.weather[0].description,
+      icon: `https://openweathermap.org/img/wn/${data.weather[0].icon}.png`,
+    };
+    this.setLoadingWeather(false);
   }
 
-  setLoading(isLoading: boolean) {
-    this.isLoading = isLoading;
+  setLoadingWeather(isLoading: boolean) {
+    this.isLoadingWeather = isLoading;
   }
 
   setLoadingSuggestions(isLoading: boolean) {
@@ -48,53 +56,96 @@ class WeatherStore {
     this.error = null;
   }
 
-  async fetchWeather(city: string) {
-    this.clearError();
-    this.setLoading(true);
-    this.weatherSource = "search";
+  setLastLocation(latitude: number, longitude: number) {
+    this.lastLocation = { latitude, longitude };
+    this.weatherSource = 'location';
+  }
+
+  resetLastLocation() {
+    this.lastLocation = null;
+  }
+
+  resetWeatherSource() {
+    this.weatherSource = 'search';
+  }
+
+  setIsRequestingLocation(isRequesting: boolean) {
+    this.isRequestingLocation = isRequesting;
+  }
+
+  handleError(error: unknown, defaultMessage: string) {
+    if (error instanceof Error) {
+      this.setError(error.message || defaultMessage);
+    } else {
+      this.setError(defaultMessage);
+    }
+  }
+
+  async fetchData(url: string, isCitySuggestions: boolean = false) {
     try {
-      const data = await fetchWeatherData(city);
-      this.setWeatherData(data);
-    } catch (error) {
-      this.setError((error as Error).message || "An unknown error occurred");
+      const response = await fetchWithAuth(url);
+
+      if (!response) {
+        throw new Error('No response received from the server.');
+      }
+
+      if (isCitySuggestions) {
+        const data: CityFromAPI[] = await response.json();
+        this.options = data.map((city: CityFromAPI) => ({
+          id: city.id,
+          name: city.name,
+          country: city.country,
+        }));
+      } else {
+        const data: RawWeatherData = await response.json();
+        this.setWeatherData(data);
+      }
+    } catch (error: unknown) {
+      this.handleError(error, 'An error occurred while fetching data');
     } finally {
-      this.setLoading(false);
+      if (!isCitySuggestions) {
+        this.setLoadingWeather(false);
+      }
     }
   }
 
   async fetchWeatherByLocation(latitude: number, longitude: number) {
-    if (this.lastLocation && this.weatherSource === "location") return;
-    this.setLoading(true);
-    this.isRequestingLocation = true;
-    this.weatherSource = "location";
-    try {
-      const data = await fetchWeatherByCoordinates(latitude, longitude);
-      this.setWeatherData(data);
-      this.lastLocation = { latitude , longitude };
-    } catch (error) {
-      this.setError((error as Error).message || "An unknown error occurred");
-    } finally {
-      this.isRequestingLocation = false;
-      this.setLoading(false);
+    if (this.lastLocation && this.lastLocation.latitude === latitude && this.lastLocation.longitude === longitude) {
+      return;
     }
+
+    this.setLoadingWeather(true);
+    this.setIsRequestingLocation(true);
+
+    this.setLastLocation(latitude, longitude);
+    const url = `/api/weather?latitude=${latitude}&longitude=${longitude}`;
+    await this.fetchData(url);
+    this.setLastSearchedCity(null);
+    this.setIsRequestingLocation(false);
+    this.setLoadingWeather(false);
+  }
+
+  async fetchWeather(city: string) {
+    this.resetWeatherSource();
+    this.resetLastLocation();
+    const url = `/api/weather?city=${city}`;
+    await this.fetchData(url);
   }
 
   async fetchCitySuggestions(query: string) {
-    if (query.length < 3) return;
+    if (query.length < 3) {
+      this.clearSuggestions();
+      return;
+    }
 
     this.setLoadingSuggestions(true);
 
     try {
-      const data: CitySearchResponse = await fetchCitySuggestions(query);
-      
-      const cityNames = data.list.map((city) => ({
-        id: city.id,
-        name: city.name,
-        country: city.sys.country,
-      }));
-      this.options = cityNames;
-    } catch {
-      this.options = [];
+      const url = `/api/weather?query=${query}`;
+      await this.fetchData(url, true);
+    } catch (error: unknown) {
+      this.clearSuggestions();
+      this.handleError(error, 'An error occurred while fetching city suggestions');
     } finally {
       this.setLoadingSuggestions(false);
     }

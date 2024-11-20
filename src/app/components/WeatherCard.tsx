@@ -8,10 +8,10 @@ const getErrorMessage = (error: string | Error | null): string => {
   return error instanceof Error ? error.message : error;
 };
 
-const WeatherCard: React.FC<WeatherCardProps> = ({ data, isLoading, error }) => {
-  if (isLoading) {
+const WeatherCard: React.FC<WeatherCardProps> = ({ data, isLoadingWeather, error }) => {
+  if (isLoadingWeather) {
     return (
-      <Card sx={{ marginTop: 2, padding: 2 }}>
+      <Card sx={{ marginTop: 2, padding: 2, minHeight: 300 }}>
         <CardContent>
           <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: 150 }}>
             <CircularProgress />
@@ -23,7 +23,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ data, isLoading, error }) => 
 
   if (error) {
     return (
-      <Card sx={{ marginTop: 2, padding: 2 }}>
+      <Card sx={{ marginTop: 2, padding: 2, minHeight: 300 }}>
         <CardContent>
           <Box sx={{ textAlign: 'center', marginTop: 3 }}>
             <Typography color="error">{getErrorMessage(error)}</Typography>
@@ -35,7 +35,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ data, isLoading, error }) => 
 
   if (!data) {
     return (
-      <Card sx={{ marginTop: 2, padding: 2 }}>
+      <Card sx={{ marginTop: 2, padding: 2, minHeight: 300 }}>
         <CardContent>
           <Box sx={{ textAlign: 'center', marginTop: 3 }}>
             <Typography>No weather data available. Please search for a city or enable location access.</Typography>
@@ -45,12 +45,12 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ data, isLoading, error }) => 
     );
   }
 
-  const { city, country, temperature, humidity, pressure, windSpeed, description, icon } = data;
+  const { name, country, temperature, humidity, pressure, windSpeed, description, icon } = data;
   const tempCelsius = Math.round(temperature);
   const temperatureColor = tempCelsius > 25 ? 'orange' : tempCelsius < 10 ? 'blue' : 'black';
 
   return (
-    <Card sx={{ marginTop: 2, padding: 2 }}>
+    <Card sx={{ marginTop: 2, padding: 2, minHeight: 300 }}>
       <CardContent>
         <Typography variant="h6" sx={{ textAlign: 'center', marginBottom: 1 }}>
           Current Weather
@@ -69,7 +69,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ data, isLoading, error }) => 
           {description}
         </Typography>
 
-        <Typography variant="body1">City: {city}</Typography>
+        <Typography variant="body1">City: {name}</Typography>
         <Typography variant="body1">Country: {country}</Typography>
         <Typography variant="body1" sx={{ color: temperatureColor }}>
           Temperature: {tempCelsius}°C

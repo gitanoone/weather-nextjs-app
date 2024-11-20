@@ -1,10 +1,10 @@
-import React, { useCallback } from 'react';
+import React from 'react';
 import { Button } from '@mui/material';
 import { observer } from 'mobx-react-lite';
 import weatherStore from '../store/weatherStore';
 
 const LocationButton: React.FC = observer(() => {
-  const fetchWeatherByLocation = useCallback(async () => {
+  const fetchWeatherByLocation = async () => {
     if (weatherStore.isRequestingLocation) return;
 
     if (!navigator.geolocation) {
@@ -15,8 +15,19 @@ const LocationButton: React.FC = observer(() => {
     navigator.geolocation.getCurrentPosition(
       async (position) => {
         const { latitude, longitude } = position.coords;
+
+        if (
+          weatherStore.lastLocation &&
+          weatherStore.lastLocation.latitude === latitude &&
+          weatherStore.lastLocation.longitude === longitude
+        ) {
+          console.log("Location hasn't changed, skipping weather request.");
+          return;
+        }
+
         try {
           await weatherStore.fetchWeatherByLocation(latitude, longitude);
+          weatherStore.setLastLocation(latitude, longitude);  // Save the new location
           weatherStore.clearSuggestions();
         } catch {
           weatherStore.setError('Failed to fetch weather data for your location.');
@@ -40,7 +51,7 @@ const LocationButton: React.FC = observer(() => {
         weatherStore.setError(errorMessage);
       }
     );
-  }, [weatherStore]);
+  };
 
   const buttonText = (() => {
     if (weatherStore.isRequestingLocation) return 'Fetching Location...';
@@ -52,7 +63,7 @@ const LocationButton: React.FC = observer(() => {
     <Button
       variant="outlined"
       onClick={fetchWeatherByLocation}
-      disabled={weatherStore.isRequestingLocation}
+      disabled={weatherStore.isRequestingLocation || weatherStore.weatherSource === 'location'}
       aria-busy={weatherStore.isRequestingLocation}
       sx={{
         width: '100%',

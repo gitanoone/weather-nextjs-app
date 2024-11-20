@@ -1,18 +1,21 @@
-// City interface
 export interface City {
   id: number;
   name: string;
   country: string;
 }
 
-// Weather system information
+export interface CityFromAPI {
+  id: number;
+  name: string;
+  country: string;
+}
+
 export interface WeatherSys {
   country: string;
   sunrise: number;
   sunset: number;
 }
 
-// Main weather metrics
 export interface WeatherMain {
   temp: number;
   feels_like: number;
@@ -22,19 +25,16 @@ export interface WeatherMain {
   humidity: number;
 }
 
-// Wind information
 export interface WeatherWind {
   speed: number;
   deg: number;
 }
 
-// Individual weather description
 export interface WeatherCondition {
   description: string;
   icon: string;
 }
 
-// API-provided weather data structure
 export interface WeatherData {
   main: WeatherMain;
   wind: WeatherWind;
@@ -42,9 +42,8 @@ export interface WeatherData {
   weather: WeatherCondition[];
 }
 
-// Processed current weather
 export interface CurrentWeather {
-  city: string;
+  name: string;
   country: string;
   temperature: number;
   humidity: number;
@@ -55,6 +54,7 @@ export interface CurrentWeather {
 }
 
 export interface RawWeatherData {
+  id: number;
   name: string;
   sys: WeatherSys;
   main: WeatherMain;
@@ -62,16 +62,8 @@ export interface RawWeatherData {
   weather: WeatherCondition[];
 }
 
-export interface CitySearchResponse {
-  list: {
-    id: number;
-    name: string;
-    sys: { country: string };
-  }[];
-}
-
 export interface WeatherCardProps {
   data?: CurrentWeather | null;
-  isLoading: boolean;
+  isLoadingWeather: boolean;
   error: string | Error | null;
 }
