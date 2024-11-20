@@ -1,7 +1,7 @@
 import { makeAutoObservable } from "mobx";
 import { fetchWeatherData, fetchWeatherByCoordinates, fetchCitySuggestions } from "../services/weatherService";
 import { transformWeatherData } from "../utils/weatherUtils";
-import { City, CurrentWeather } from "../types/weatherTypes";
+import { City, CurrentWeather, RawWeatherData, CitySearchResponse} from "../types/weatherTypes";
 
 class WeatherStore {
   city: City | null = null;
@@ -22,8 +22,8 @@ class WeatherStore {
   setLastSearchedCity(city: City | null) {
     this.lastSearchedCity = city;
   }
-  
-  setWeatherData(data: any) {
+
+  setWeatherData(data: RawWeatherData) {
     this.weatherData = transformWeatherData(data);
     this.isLoading = false;
   }
@@ -85,8 +85,9 @@ class WeatherStore {
     this.setLoadingSuggestions(true);
 
     try {
-      const data = await fetchCitySuggestions(query);
-      const cityNames = data.list.map((city: any) => ({
+      const data: CitySearchResponse = await fetchCitySuggestions(query);
+      
+      const cityNames = data.list.map((city) => ({
         id: city.id,
         name: city.name,
         country: city.sys.country,

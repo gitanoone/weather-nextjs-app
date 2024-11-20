@@ -53,3 +53,19 @@ export interface CurrentWeather {
   description: string;
   icon: string;
 }
+
+export interface RawWeatherData {
+  name: string;
+  sys: WeatherSys;
+  main: WeatherMain;
+  wind: WeatherWind;
+  weather: WeatherCondition[];
+}
+
+export interface CitySearchResponse {
+  list: {
+    id: number;
+    name: string;
+    sys: { country: string };
+  }[];
+}

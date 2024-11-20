@@ -40,7 +40,7 @@ const LocationButton: React.FC = observer(() => {
         weatherStore.setError(errorMessage);
       }
     );
-  }, [weatherStore.isRequestingLocation, weatherStore.weatherSource]);
+  }, [weatherStore]);
 
   const buttonText = (() => {
     if (weatherStore.isRequestingLocation) return 'Fetching Location...';

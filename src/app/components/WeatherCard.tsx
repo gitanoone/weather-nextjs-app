@@ -1,6 +1,8 @@
 import React from 'react';
 import { Card, CardContent, Typography, Box, CircularProgress } from '@mui/material';
 import { CurrentWeather } from '../types/weatherTypes';
+import Image from 'next/image';
+
 
 interface WeatherCardProps {
   data?: CurrentWeather | null;
@@ -61,7 +63,12 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ data, isLoading, error }) => 
         </Typography>
 
         <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: 1 }}>
-          <img src={data.icon} alt={data.description} width="50" height="50" />
+          <Image
+            src={data.icon}
+            alt={data.description}
+            width={50}
+            height={50}
+          />
         </Box>
 
         <Typography variant="body1" sx={{ textAlign: 'center', marginTop: 1 }}>

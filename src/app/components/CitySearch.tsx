@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import { observer } from "mobx-react-lite";
-import { TextField, Autocomplete, Box, CircularProgress } from "@mui/material";
+import { TextField, Autocomplete, Box } from "@mui/material";
 import weatherStore from "../store/weatherStore";
 import LocationButton from "./LocationButton";
 import { useDebouncedCallback } from "../hooks/useDebouncedCallback";
@@ -21,7 +21,7 @@ const CitySearch: React.FC = observer(() => {
   };
 
   const handleSelectCity = useCallback(
-    (event: any, selectedCity: City | null) => {
+    (event: React.SyntheticEvent, selectedCity: City | null) => {
       if (selectedCity) {
         if (
           !lastSearchedCity ||

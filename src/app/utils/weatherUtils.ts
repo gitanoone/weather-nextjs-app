@@ -1,4 +1,6 @@
-export function transformWeatherData(rawData: any) {
+import { RawWeatherData }  from "../types/weatherTypes";
+
+export function transformWeatherData(rawData: RawWeatherData) {
     const tempCelsius = Math.round(rawData.main.temp - 273.15);
     return {
       city: rawData.name,

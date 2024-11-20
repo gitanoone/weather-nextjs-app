@@ -1,19 +1,18 @@
 import { useCallback, useRef } from "react";
 
-export const useDebouncedCallback = (callback: (...args: any[]) => void, delay: number) => {
+export function useDebouncedCallback<T extends (...args: unknown[]) => void>(
+  callback: T,
+  delay: number
+): (...args: Parameters<T>) => void {
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  const debouncedFunction = useCallback(
-    (...args: any[]) => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current);
-      }
-      timeoutRef.current = setTimeout(() => {
-        callback(...args);
-      }, delay);
-    },
-    [callback, delay]
-  );
+  return useCallback((...args: Parameters<T>) => {
+    if (timeoutRef.current) {
+      clearTimeout(timeoutRef.current);
+    }
 
-  return debouncedFunction;
-};
+    timeoutRef.current = setTimeout(() => {
+      callback(...args);
+    }, delay);
+  }, [callback, delay]);
+}
