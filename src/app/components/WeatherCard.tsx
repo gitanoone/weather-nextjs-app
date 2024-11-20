@@ -1,6 +1,6 @@
 import React from 'react';
 import { Card, CardContent, Typography, Box, CircularProgress } from '@mui/material';
-import { CurrentWeather, WeatherCardProps } from '../types/weatherTypes';
+import { WeatherCardProps } from '../types/weatherTypes';
 import Image from 'next/image';
 
 const getErrorMessage = (error: string | Error | null): string => {
