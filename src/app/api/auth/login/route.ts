@@ -4,11 +4,11 @@ import jwt from 'jsonwebtoken';
 const JWT_SECRET = process.env.JWT_SECRET!;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
 
-const generateRefreshToken = (user: { role: string, id: string }) => {
+const generateRefreshToken = (user: { role: string; id: string }) => {
   return jwt.sign(user, JWT_REFRESH_SECRET, { expiresIn: '7d' });
 };
 
-const generateAccessToken = (user: { role: string, id: string }) => {
+const generateAccessToken = (user: { role: string; id: string }) => {
   return jwt.sign(user, JWT_SECRET, { expiresIn: '1h' });
 };
 
@@ -18,8 +18,8 @@ export async function GET() {
   const accessToken = generateAccessToken(user);
   const refreshToken = generateRefreshToken(user);
 
-  return NextResponse.json({ 
+  return NextResponse.json({
     token: accessToken,
-    refreshToken: refreshToken
+    refreshToken: refreshToken,
   });
 }
