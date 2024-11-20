@@ -1,0 +1,14 @@
+export function transformWeatherData(rawData: any) {
+    const tempCelsius = Math.round(rawData.main.temp - 273.15);
+    return {
+      city: rawData.name,
+      country: rawData.sys.country,
+      temperature: tempCelsius,
+      humidity: rawData.main.humidity,
+      pressure: rawData.main.pressure,
+      windSpeed: rawData.wind.speed,
+      description: rawData.weather[0].description,
+      icon: `https://openweathermap.org/img/wn/${rawData.weather[0].icon}.png`,
+    };
+  }
+  
