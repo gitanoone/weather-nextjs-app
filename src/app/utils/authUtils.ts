@@ -77,7 +77,7 @@ export const fetchWithAuth = async (url: string, options: RequestInit = {}): Pro
       });
 
       if (res.status === 401) {
-        let token = await refreshToken();
+        const token = await refreshToken();
         if (!token) return;
 
         return fetch(url, {

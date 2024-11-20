@@ -12,7 +12,7 @@ const generateAccessToken = (user: { role: string, id: string }) => {
   return jwt.sign(user, JWT_SECRET, { expiresIn: '1h' });
 };
 
-export async function GET(req: Request) {
+export async function GET() {
   const user = { role: 'guest', id: '12345' };
 
   const accessToken = generateAccessToken(user);

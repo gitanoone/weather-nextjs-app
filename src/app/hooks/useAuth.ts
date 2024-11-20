@@ -11,7 +11,7 @@ const useAuth = () => {
       const decoded = JSON.parse(atob(token.split('.')[1]));
       return decoded.exp < Date.now() / 1000;
     } catch (error) {
-      console.error('Invalid token format');
+      console.error('Invalid token format' + error);
       return true;
     }
   };
@@ -81,7 +81,7 @@ const useAuth = () => {
 
   useEffect(() => {
     const getToken = async () => {
-      let currentToken = localStorage.getItem('jwtToken');
+      const currentToken = localStorage.getItem('jwtToken');
 
       if (!currentToken || isTokenExpired(currentToken)) {
         if (currentToken) {
