@@ -1,14 +1,7 @@
 import React from 'react';
 import { Card, CardContent, Typography, Box, CircularProgress } from '@mui/material';
-import { CurrentWeather } from '../types/weatherTypes';
+import { CurrentWeather, WeatherCardProps } from '../types/weatherTypes';
 import Image from 'next/image';
-
-
-interface WeatherCardProps {
-  data?: CurrentWeather | null;
-  isLoading: boolean;
-  error: string | Error | null;
-}
 
 const getErrorMessage = (error: string | Error | null): string => {
   if (!error) return '';
@@ -52,7 +45,8 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ data, isLoading, error }) => 
     );
   }
 
-  const tempCelsius = Math.round(data.temperature);
+  const { city, country, temperature, humidity, pressure, windSpeed, description, icon } = data;
+  const tempCelsius = Math.round(temperature);
   const temperatureColor = tempCelsius > 25 ? 'orange' : tempCelsius < 10 ? 'blue' : 'black';
 
   return (
@@ -64,25 +58,25 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ data, isLoading, error }) => 
 
         <Box sx={{ display: 'flex', justifyContent: 'center', marginTop: 1 }}>
           <Image
-            src={data.icon}
-            alt={data.description}
+            src={icon}
+            alt={description}
             width={50}
             height={50}
           />
         </Box>
 
         <Typography variant="body1" sx={{ textAlign: 'center', marginTop: 1 }}>
-          {data.description}
+          {description}
         </Typography>
 
-        <Typography variant="body1">City: {data.city}</Typography>
-        <Typography variant="body1">Country: {data.country}</Typography>
+        <Typography variant="body1">City: {city}</Typography>
+        <Typography variant="body1">Country: {country}</Typography>
         <Typography variant="body1" sx={{ color: temperatureColor }}>
           Temperature: {tempCelsius}°C
         </Typography>
-        <Typography variant="body1">Humidity: {data.humidity}%</Typography>
-        <Typography variant="body1">Pressure: {data.pressure} hPa</Typography>
-        <Typography variant="body1">Wind Speed: {data.windSpeed} m/s</Typography>
+        <Typography variant="body1">Humidity: {humidity}%</Typography>
+        <Typography variant="body1">Pressure: {pressure} hPa</Typography>
+        <Typography variant="body1">Wind Speed: {windSpeed} m/s</Typography>
       </CardContent>
     </Card>
   );

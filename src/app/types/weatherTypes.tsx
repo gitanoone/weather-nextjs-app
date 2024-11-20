@@ -69,3 +69,9 @@ export interface CitySearchResponse {
     sys: { country: string };
   }[];
 }
+
+export interface WeatherCardProps {
+  data?: CurrentWeather | null;
+  isLoading: boolean;
+  error: string | Error | null;
+}
