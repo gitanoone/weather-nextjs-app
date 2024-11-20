@@ -1,17 +1,26 @@
 import { NextResponse } from 'next/server';
-import jwt from 'jsonwebtoken';
+import jwt, { JwtPayload, VerifyErrors } from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
 
-const verifyRefreshToken = (token: string) => {
+interface RefreshTokenPayload extends JwtPayload {
+  id: string;
+  role?: string;
+}
+
+const verifyRefreshToken = (token: string): RefreshTokenPayload => {
   try {
-    return jwt.verify(token, JWT_REFRESH_SECRET);
-  } catch (error: any) {
-    if (error.name === 'TokenExpiredError') {
+    const decoded = jwt.verify(token, JWT_REFRESH_SECRET) as RefreshTokenPayload;
+    return decoded;
+  } catch (error) {
+    if (error instanceof jwt.TokenExpiredError) {
       throw new Error('Refresh token expired');
     }
-    throw new Error('Invalid refresh token');
+    if (error instanceof jwt.JsonWebTokenError) {
+      throw new Error('Invalid refresh token');
+    }
+    throw new Error('Unknown error during token verification');
   }
 };
 
@@ -29,7 +38,7 @@ export async function POST(req: Request) {
     const newRefreshToken = jwt.sign({ id: user.id }, JWT_REFRESH_SECRET, { expiresIn: '7d' });
 
     return NextResponse.json({ accessToken: newAccessToken, refreshToken: newRefreshToken });
-  } catch (error: any) {
-    return NextResponse.json({ error: error.message || 'Invalid refresh token' }, { status: 403 });
+  } catch (error) {
+    return NextResponse.json({ error: (error as Error).message || 'Invalid refresh token' }, { status: 403 });
   }
 }
