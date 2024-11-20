@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import jwt, { JwtPayload, VerifyErrors } from 'jsonwebtoken';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 
 const JWT_SECRET = process.env.JWT_SECRET!;
 const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET!;
