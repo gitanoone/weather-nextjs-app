@@ -1,50 +1,41 @@
 "use client";
 
 import React, { useEffect } from 'react';
-import { Box, Typography, Button, useMediaQuery, CssBaseline } from '@mui/material';
+import { Box, Typography, Button, CssBaseline } from '@mui/material';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { observer } from 'mobx-react-lite';
 import CitySearch from './components/CitySearch';
 import WeatherCard from './components/WeatherCard';
-import weatherStore from './store/weatherStore';
 import themeStore from './store/themeStore';
 import useAuth from './hooks/useAuth';
 
 const HomePage = observer(() => {
-  useAuth();
-
-  const { weatherData, isLoadingWeather, error } = weatherStore;
-  const prefersDarkMode = useMediaQuery('(prefers-color-scheme: dark)');
-
   useEffect(() => {
-    themeStore.setThemeMode(prefersDarkMode ? 'dark' : 'light');
-  }, [prefersDarkMode]);
+    themeStore.initTheme();
+  }, []);
 
+  useAuth();
+  
   const theme = createTheme({
     palette: {
       mode: themeStore.themeMode,
-      primary: {
-        main: '#1976d2',
-      },
+      primary: { main: '#1976d2' },
       background: {
         default: themeStore.themeMode === 'light' ? '#f5f5f5' : '#303030',
       },
-    },
-    typography: {
-      fontFamily: 'Roboto, Arial, sans-serif',
     },
   });
 
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      
       <Box
         sx={{
           padding: 3,
           maxWidth: 600,
           margin: 'auto',
-          backgroundColor: 'background.default',
+          backgroundColor: theme.palette.background.default,
+          color: theme.palette.text.primary,
           borderRadius: 2,
           boxShadow: 2,
           minHeight: '100vh',
@@ -58,7 +49,7 @@ const HomePage = observer(() => {
           align="center"
           sx={{
             marginBottom: 3,
-            color: themeStore.themeMode === 'light' ? '#1976d2' : '#fff',
+            color: theme.palette.primary.main,
             fontWeight: 600,
           }}
         >
@@ -66,21 +57,17 @@ const HomePage = observer(() => {
         </Typography>
 
         <CitySearch />
-        <WeatherCard
-          data={!isLoadingWeather ? weatherData : null}
-          isLoadingWeather={isLoadingWeather}
-          error={error}
-        />
+        <WeatherCard />
 
         <Button
           variant="contained"
           onClick={() => themeStore.toggleTheme()}
           sx={{
             marginTop: 3,
-            backgroundColor: themeStore.themeMode === 'light' ? '#1976d2' : '#424242',
-            color: '#fff',
+            backgroundColor: theme.palette.primary.main,
+            color: theme.palette.primary.contrastText,
             '&:hover': {
-              backgroundColor: themeStore.themeMode === 'light' ? '#1565c0' : '#616161',
+              backgroundColor: theme.palette.primary.dark,
             },
           }}
         >

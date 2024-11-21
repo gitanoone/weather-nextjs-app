@@ -4,60 +4,57 @@ import { observer } from 'mobx-react-lite';
 import weatherStore from '../store/weatherStore';
 
 const LocationButton: React.FC = observer(() => {
-  const fetchWeatherByLocation = async () => {
-    if (weatherStore.isRequestingLocation) return;
+  const handleGeolocationError = (error: GeolocationPositionError) => {
+    const errorMessages : Record<number, string> = {
+      [error.PERMISSION_DENIED]: 'Permission denied. Please enable location access.',
+      [error.POSITION_UNAVAILABLE]: 'Location unavailable. Try again later.',
+      [error.TIMEOUT]: 'Location request timed out.',
+    };
+    weatherStore.setError(errorMessages[error.code] || 'Failed to fetch location.');
+  };
 
-    if (!navigator.geolocation) {
-      weatherStore.setError('Geolocation is not supported by your browser.');
+  const fetchWeatherByLocation = async () => {
+    if (weatherStore.isRequestingLocation || !navigator.geolocation) {
+      weatherStore.setError(
+        !navigator.geolocation
+          ? 'Geolocation is not supported by your browser.'
+          : 'A location request is already in progress.'
+      );
       return;
     }
 
     navigator.geolocation.getCurrentPosition(
-      async (position) => {
-        const { latitude, longitude } = position.coords;
+      async ({ coords: { latitude, longitude } }) => {
+        const hasLocationChanged =
+          !weatherStore.lastLocation ||
+          weatherStore.lastLocation.latitude !== latitude ||
+          weatherStore.lastLocation.longitude !== longitude;
 
-        if (
-          weatherStore.lastLocation &&
-          weatherStore.lastLocation.latitude === latitude &&
-          weatherStore.lastLocation.longitude === longitude
-        ) {
+        if (!hasLocationChanged) {
           console.log("Location hasn't changed, skipping weather request.");
           return;
         }
 
         try {
+          weatherStore.setLoadingWeather(true);
           await weatherStore.fetchWeatherByLocation(latitude, longitude);
-          weatherStore.setLastLocation(latitude, longitude);  // Save the new location
+          weatherStore.setLastLocation(latitude, longitude);
           weatherStore.clearSuggestions();
         } catch {
           weatherStore.setError('Failed to fetch weather data for your location.');
+        } finally {
+          weatherStore.setLoadingWeather(false);
         }
       },
-      (error) => {
-        let errorMessage = '';
-        switch (error.code) {
-          case error.PERMISSION_DENIED:
-            errorMessage = 'Permission denied. Please enable location access.';
-            break;
-          case error.POSITION_UNAVAILABLE:
-            errorMessage = 'Location unavailable. Try again later.';
-            break;
-          case error.TIMEOUT:
-            errorMessage = 'Location request timed out.';
-            break;
-          default:
-            errorMessage = 'Failed to fetch location.';
-        }
-        weatherStore.setError(errorMessage);
-      }
+      handleGeolocationError
     );
   };
 
-  const buttonText = (() => {
+  const getButtonText = () => {
     if (weatherStore.isRequestingLocation) return 'Fetching Location...';
     if (weatherStore.weatherSource === 'location') return 'Weather Loaded by Location';
     return 'Use My Location';
-  })();
+  };
 
   return (
     <Button
@@ -73,7 +70,7 @@ const LocationButton: React.FC = observer(() => {
         fontSize: 16,
       }}
     >
-      {buttonText}
+      {getButtonText()}
     </Button>
   );
 });

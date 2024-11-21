@@ -1,4 +1,4 @@
-import { makeAutoObservable } from "mobx";
+import { makeAutoObservable } from 'mobx';
 
 class ThemeStore {
   themeMode: 'light' | 'dark' = 'light';
@@ -9,10 +9,22 @@ class ThemeStore {
 
   setThemeMode(mode: 'light' | 'dark') {
     this.themeMode = mode;
+    localStorage?.setItem('themeMode', mode);
   }
 
   toggleTheme() {
-    this.themeMode = this.themeMode === 'light' ? 'dark' : 'light';
+    const newMode = this.themeMode === 'light' ? 'dark' : 'light';
+    this.setThemeMode(newMode);
+  }
+
+  initTheme() {
+    const savedMode = localStorage?.getItem('themeMode');
+    if (savedMode === 'light' || savedMode === 'dark') {
+      this.themeMode = savedMode;
+    } else {
+      const prefersDarkMode = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      this.themeMode = prefersDarkMode ? 'dark' : 'light';
+    }
   }
 }
 

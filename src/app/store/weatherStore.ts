@@ -114,7 +114,6 @@ class WeatherStore {
       return;
     }
 
-    this.setLoadingWeather(true);
     this.setIsRequestingLocation(true);
 
     this.setLastLocation(latitude, longitude);

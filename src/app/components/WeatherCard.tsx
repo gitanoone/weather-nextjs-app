@@ -1,6 +1,7 @@
 import React from 'react';
 import { Card, CardContent, Typography, Box, CircularProgress } from '@mui/material';
-import { WeatherCardProps } from '../types/weatherTypes';
+import { observer } from 'mobx-react-lite';
+import weatherStore from '../store/weatherStore';
 import Image from 'next/image';
 
 const getErrorMessage = (error: string | Error | null): string => {
@@ -8,7 +9,9 @@ const getErrorMessage = (error: string | Error | null): string => {
   return error instanceof Error ? error.message : error;
 };
 
-const WeatherCard: React.FC<WeatherCardProps> = ({ data, isLoadingWeather, error }) => {
+const WeatherCard: React.FC = observer(() => {
+  const { weatherData, isLoadingWeather, error } = weatherStore;
+
   if (isLoadingWeather) {
     return (
       <Card sx={{ marginTop: 2, padding: 2, minHeight: 300 }}>
@@ -33,7 +36,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ data, isLoadingWeather, error
     );
   }
 
-  if (!data) {
+  if (!weatherData) {
     return (
       <Card sx={{ marginTop: 2, padding: 2, minHeight: 300 }}>
         <CardContent>
@@ -45,7 +48,7 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ data, isLoadingWeather, error
     );
   }
 
-  const { name, country, temperature, humidity, pressure, windSpeed, description, icon } = data;
+  const { name, country, temperature, humidity, pressure, windSpeed, description, icon } = weatherData;
   const tempCelsius = Math.round(temperature);
   const temperatureColor = tempCelsius > 25 ? 'orange' : tempCelsius < 10 ? 'blue' : 'black';
 
@@ -80,6 +83,6 @@ const WeatherCard: React.FC<WeatherCardProps> = ({ data, isLoadingWeather, error
       </CardContent>
     </Card>
   );
-};
+});
 
 export default WeatherCard;
