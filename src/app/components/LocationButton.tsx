@@ -25,6 +25,7 @@ const LocationButton: React.FC = observer(() => {
 
     navigator.geolocation.getCurrentPosition(
       async ({ coords: { latitude, longitude } }) => {
+        weatherStore.setLoadingWeather(true);
         const hasLocationChanged =
           !weatherStore.lastLocation ||
           weatherStore.lastLocation.latitude !== latitude ||
@@ -36,7 +37,6 @@ const LocationButton: React.FC = observer(() => {
         }
 
         try {
-          weatherStore.setLoadingWeather(true);
           await weatherStore.fetchWeatherByLocation(latitude, longitude);
           weatherStore.setLastLocation(latitude, longitude);
           weatherStore.clearSuggestions();
